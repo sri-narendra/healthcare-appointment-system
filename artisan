@@ -1,0 +1,28 @@
+<?php
+
+define('LARAVEL_START', microtime(true));
+
+require __DIR__.'/vendor/autoload.php';
+
+if (($_SERVER['argv'][1] ?? null) === 'serve') {
+    $inject = true;
+    foreach ($_SERVER['argv'] as $p) {
+        if (str_starts_with($p, '--no-reload')) { $inject = false; break; }
+    }
+    if ($inject) {
+        $_SERVER['argv'][] = '--no-reload';
+    }
+}
+
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+$kernel->terminate($input, $status);
+
+exit($status);
